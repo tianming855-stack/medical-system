@@ -27,6 +27,8 @@ medical-system
 │  ├─ MedicalApplication.java      启动类
 │  └─ controller/HelloController.java   环境验证接口
 ├─ src/main/resources/application.yml
+├─ sql/init.sql                    数据库初始化脚本
+├─ docs/实验1-环境搭建与验证记录.md
 └─ README.md
 ```
 
@@ -44,6 +46,21 @@ mvn spring-boot:run
 | GET | `/api/v1/hello?name=xxx` | 返回系统状态 JSON |
 | GET | `/api/v1/ping` | 返回 `pong` |
 | GET | `/actuator/health` | 健康检查 |
+
+## 数据库
+
+- 库名 `medical_system`，字符集 utf8mb4，排序规则 utf8mb4_general_ci
+- 业务账号 `medical@localhost` / `Medical@2026`（root 密码不入库）
+- 表 `patient`（患者基本信息表），含样例数据 `P2026001 张三`
+- 初始化脚本 `sql/init.sql`，可重复执行，已存在的对象会跳过
+
+重跑脚本（需输入 root 密码）：
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -uroot -p --default-character-set=utf8mb4 < "C:\Users\TM129\Doubao\chats\2026-11-06\new-chat\medical-system\sql\init.sql"
+```
+
+注意：必须用文件重定向 `<` 导入。用 `Get-Content | mysql` 管道会把中文转成 `?`。
 
 ## 分支规范
 
