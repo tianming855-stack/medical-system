@@ -10,6 +10,7 @@
 | Maven | 3.9.16 | `D:\dev\maven` |
 | Git | 2.56.0 | `D:\dev\Git` |
 | MySQL | 8.0（服务 MySQL80） | 系统安装 |
+| IDEA | IntelliJ IDEA Ultimate 2026.3（build IU-263.7307.200） | `D:\IntelliJ IDEA 2026.3` |
 
 环境变量（用户级，已写入注册表）：
 
