@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.medical.mapper.RegistrationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hospital.medical.entity.Registration">
+        <id column="id" property="id" />
+        <result column="reg_no" property="regNo" />
+        <result column="patient_id" property="patientId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="reg_time" property="regTime" />
+        <result column="reg_type" property="regType" />
+        <result column="charge_amount" property="chargeAmount" />
+        <result column="status" property="status" />
+        <result column="created_time" property="createdTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, reg_no, patient_id, doctor_id, reg_time, reg_type, charge_amount, status, created_time
+    </sql>
+
+    <!-- 挂号详情：多表关联查询，条件由 #{} 绑定，避免 SQL 注入 -->
+    <select id="selectDetailPage" resultType="com.hospital.medical.vo.RegistrationDetail">
+        SELECT r.id            AS id,
+               r.reg_no        AS regNo,
+               r.reg_time      AS regTime,
+               r.reg_type      AS regType,
+               r.charge_amount AS chargeAmount,
+               r.status        AS status,
+               p.name          AS patientName,
+               p.phone         AS patientPhone,
+               d.name          AS doctorName,
+               d.title         AS doctorTitle,
+               dep.dept_name   AS deptName
+        FROM registration r
+        INNER JOIN patient    p   ON p.id = r.patient_id
+        INNER JOIN doctor     d   ON d.id = r.doctor_id
+        INNER JOIN department dep ON dep.id = d.department_id
+        <where>
+            <if test="patientName != null and patientName != ''">
+                AND p.name LIKE CONCAT('%', #{patientName}, '%')
+            </if>
+            <if test="deptId != null">
+                AND dep.id = #{deptId}
+            </if>
+            <if test="status != null">
+                AND r.status = #{status}
+            </if>
+        </where>
+        ORDER BY r.reg_time DESC
+    </select>
+
+</mapper>

@@ -22,3 +22,6 @@ Thumbs.db
 ### Logs ###
 *.log
 logs/
+
+### 数据库本地备份，不入库 ###
+sql/backup_*.sql
