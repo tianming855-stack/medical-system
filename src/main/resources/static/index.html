@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>医疗系统 · 管理后台</title>
+<style>
+  :root {
+    --primary: #0f766e;
+    --primary-dark: #115e59;
+    --primary-soft: #f0fdfa;
+    --line: #e2e8f0;
+    --text: #1f2937;
+    --muted: #64748b;
+    --danger: #b91c1c;
+    --bg: #f6f8fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+  }
+  header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    padding: 0 28px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--primary);
+    color: #fff; font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand h1 { font-size: 18px; margin: 0; font-weight: 600; letter-spacing: .5px; }
+  .brand span { color: var(--muted); font-size: 12px; margin-left: 8px; }
+  .api-state { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; }
+  .dot.off { background: #dc2626; }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 22px 28px 60px; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    padding: 9px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .15s;
+  }
+  .tab:hover { border-color: #94a3b8; }
+  .tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .toolbar .grow { flex: 1; }
+  input, select {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15,118,110,.12); }
+  input::placeholder { color: #94a3b8; }
+
+  .btn {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .15s;
+  }
+  .btn:hover { background: #f8fafc; }
+  .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .btn.primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+  .btn.ghost { color: var(--primary); border-color: #99f6e4; background: var(--primary-soft); }
+  .btn.danger-text { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+  .btn.sm { padding: 4px 10px; font-size: 12px; border-radius: 5px; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: #f8fafc;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    font-size: 12.5px;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;
+  }
+  tbody tr:hover { background: #fafcfc; }
+  .ops { display: flex; gap: 6px; }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+  .tag.on { background: #ecfdf5; color: #047857; }
+  .tag.off { background: #fef2f2; color: #b91c1c; }
+  .tag.gray { background: #f1f5f9; color: #475569; }
+
+  .pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pager button {
+    border: 1px solid var(--line);
+    background: #fff;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .pager button:disabled { color: #cbd5e1; cursor: not-allowed; }
+
+  .empty { text-align: center; color: var(--muted); padding: 38px 0; font-size: 13px; }
+
+  /* 弹窗 */
+  .mask {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, .42);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+  }
+  .mask.show { display: flex; }
+  .dialog {
+    background: #fff;
+    border-radius: 12px;
+    width: 560px;
+    max-width: 100%;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(15,23,42,.18);
+  }
+  .dialog h2 {
+    margin: 0;
+    padding: 18px 22px;
+    font-size: 16px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+  }
+  .dialog form {
+    padding: 18px 22px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px 18px;
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-size: 12.5px; color: var(--muted); }
+  .field label .req { color: #dc2626; margin-left: 2px; }
+  .field input, .field select { width: 100%; }
+  .dialog footer {
+    padding: 14px 22px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .toast {
+    position: fixed;
+    top: 22px; left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #0f172a;
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s;
+    z-index: 200;
+    max-width: 80vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { background: #991b1b; }
+
+  @media (max-width: 820px) {
+    main { padding: 16px 14px 40px; }
+    header { padding: 0 14px; }
+    .dialog form { grid-template-columns: 1fr; }
+    thead th, tbody td { padding: 8px 9px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">医</div>
+    <h1>医疗系统管理后台</h1>
+    <span>Medical System · Spring Boot 3 + MyBatis-Plus</span>
+  </div>
+  <div class="api-state"><span class="dot" id="stateDot"></span><span id="stateText">检查接口状态…</span></div>
+</header>
+
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div class="card" id="panel"></div>
+</main>
+
+<div class="mask" id="mask">
+  <div class="dialog">
+    <h2 id="dialogTitle">新增</h2>
+    <form id="form"></form>
+    <footer>
+      <button class="btn" type="button" id="btnCancel">取消</button>
+      <button class="btn primary" type="button" id="btnSubmit">保存</button>
+    </footer>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var API = '';
+  var GENDER = { 1: '男', 2: '女' };
+  var STATUS = { 0: '停用', 1: '启用' };
+  var REG_TYPE = { 1: '普通', 2: '专家', 3: '急诊' };
+  var REG_STATUS = { 0: '待就诊', 1: '已就诊', 2: '已取消' };
+
+  var MODULES = {
+    patient: {
+      tab: '患者管理',
+      api: '/api/v1/patient',
+      fields: [
+        { k: 'patientNo', label: '病历号', type: 'text' },
+        { k: 'name', label: '姓名', type: 'text' },
+        { k: 'gender', label: '性别', type: 'select', options: GENDER },
+        { k: 'birthDate', label: '出生日期', type: 'date' },
+        { k: 'phone', label: '手机号', type: 'text' },
+        { k: 'idCard', label: '身份证号', type: 'text' },
+        { k: 'address', label: '家庭住址', type: 'text', full: true }
+      ],
+      list: ['patientNo', 'name', 'gender', 'birthDate', 'phone', 'idCard', 'address'],
+      filters: [
+        { k: 'name', label: '姓名', type: 'text', ph: '模糊匹配' },
+        { k: 'patientNo', label: '病历号', type: 'text', ph: '模糊匹配' },
+        { k: 'phone', label: '手机号', type: 'text', ph: '精确匹配' },
+        { k: 'gender', label: '性别', type: 'select', options: GENDER }
+      ]
+    },
+    doctor: {
+      tab: '医生管理',
+      api: '/api/v1/doctor',
+      fields: [
+        { k: 'doctorNo', label: '工号', type: 'text' },
+        { k: 'name', label: '姓名', type: 'text' },
+        { k: 'gender', label: '性别', type: 'select', options: GENDER },
+        { k: 'title', label: '职称', type: 'text', ph: '如 主任医师' },
+        { k: 'departmentId', label: '所属科室', type: 'select', options: 'departments' },
+        { k: 'phone', label: '手机号', type: 'text' },
+        { k: 'email', label: '邮箱', type: 'text' },
+        { k: 'specialty', label: '擅长领域', type: 'text', full: true }
+      ],
+      list: ['doctorNo', 'name', 'gender', 'title', 'departmentId', 'phone'],
+      filters: [
+        { k: 'name', label: '姓名', type: 'text', ph: '模糊匹配' },
+        { k: 'departmentId', label: '科室', type: 'select', options: 'departments' },
+        { k: 'title', label: '职称', type: 'text', ph: '模糊匹配' }
+      ]
+    },
+    department: {
+      tab: '科室管理',
+      api: '/api/v1/department',
+      fields: [
+        { k: 'deptCode', label: '科室编码', type: 'text' },
+        { k: 'deptName', label: '科室名称', type: 'text' },
+        { k: 'location', label: '位置', type: 'text' },
+        { k: 'phone', label: '联系电话', type: 'text', full: true }
+      ],
+      list: ['deptCode', 'deptName', 'location', 'phone'],
+      filters: [
+        { k: 'deptName', label: '科室名称', type: 'text', ph: '模糊匹配' },
+        { k: 'deptCode', label: '科室编码', type: 'text', ph: '模糊匹配' }
+      ]
+    },
+    registration: {
+      tab: '挂号记录',
+      api: '/api/v1/registration',
+      readonly: true,
+      detailApi: '/api/v1/registration/page-detail',
+      list: ['regNo', 'patientName', 'doctorName', 'deptName', 'regTime', 'regType', 'chargeAmount', 'status'],
+      filters: [
+        { k: 'patientName', label: '患者姓名', type: 'text', ph: '模糊匹配' },
+        { k: 'deptId', label: '科室', type: 'select', options: 'departments' },
+        { k: 'status', label: '状态', type: 'select', options: REG_STATUS }
+      ]
+    }
+  };
+
+  var LABEL = {};
+  MODULES.patient.fields.concat(MODULES.doctor.fields, MODULES.department.fields).forEach(function (f) {
+    LABEL[f.k] = f.label;
+  });
+  LABEL.patientName = '患者';
+  LABEL.doctorName = '医生';
+  LABEL.deptName = '科室';
+  LABEL.regNo = '挂号单号';
+  LABEL.regTime = '挂号时间';
+  LABEL.regType = '类型';
+  LABEL.chargeAmount = '金额';
+  LABEL.status = '状态';
+  LABEL.title = '职称';
+  LABEL.departmentId = '科室';
+
+  var state = { key: 'patient', pageNum: 1, pageSize: 10, filters: {}, total: 0, pages: 0, records: [], departments: [], editing: null };
+
+  var elTabs = document.getElementById('tabs');
+  var elPanel = document.getElementById('panel');
+  var elMask = document.getElementById('mask');
+  var elForm = document.getElementById('form');
+  var elDialogTitle = document.getElementById('dialogTitle');
+  var elToast = document.getElementById('toast');
+
+  function esc(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function toast(msg, isErr) {
+    elToast.textContent = msg;
+    elToast.className = 'toast show' + (isErr ? ' err' : '');
+    clearTimeout(elToast._t);
+    elToast._t = setTimeout(function () { elToast.className = 'toast'; }, 2600);
+  }
+
+  function request(path, options) {
+    var opt = options || {};
+    return fetch(API + path, {
+      method: opt.method || 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      body: opt.body ? JSON.stringify(opt.body) : undefined
+    }).then(function (res) {
+      return res.json().catch(function () { return { code: res.status, message: 'HTTP ' + res.status }; });
+    }).then(function (json) {
+      if (json && json.code === 200) return json.data;
+      throw new Error((json && json.message) || '请求失败');
+    });
+  }
+
+  function renderTabs() {
+    elTabs.innerHTML = Object.keys(MODULES).map(function (k) {
+      return '<button class="tab' + (k === state.key ? ' active' : '') + '" data-key="' + k + '">' + MODULES[k].tab + '</button>';
+    }).join('');
+  }
+
+  function fieldHtml(f, value) {
+    var v = value === null || value === undefined ? '' : value;
+    var label = '<label>' + esc(f.label) + (f.required === false ? '' : '') + '</label>';
+    if (f.type === 'select') {
+      var opts = f.options === 'departments' ? state.departments.map(function (d) { return { k: String(d.id), v: d.deptName }; })
+        : Object.keys(f.options).map(function (k) { return { k: k, v: f.options[k] }; });
+      var html = '<option value="">请选择</option>' + opts.map(function (o) {
+        return '<option value="' + esc(o.k) + '"' + (String(v) === String(o.k) ? ' selected' : '') + '>' + esc(o.v) + '</option>';
+      }).join('');
+      return '<div class="field' + (f.full ? ' full' : '') + '">' + label + '<select name="' + f.k + '">' + html + '</select></div>';
+    }
+    return '<div class="field' + (f.full ? ' full' : '') + '">' + label +
+      '<input name="' + f.k + '" type="' + (f.type === 'date' ? 'date' : 'text') + '" value="' + esc(f.type === 'date' ? String(v).slice(0, 10) : v) + '" placeholder="' + esc(f.ph || '') + '"></div>';
+  }
+
+  function renderPanel() {
+    var m = MODULES[state.key];
+    var filters = m.filters.map(function (f) {
+      if (f.type === 'select') {
+        var opts = f.options === 'departments' ? state.departments.map(function (d) { return { k: String(d.id), v: d.deptName }; })
+          : Object.keys(f.options).map(function (k) { return { k: k, v: f.options[k] }; });
+        return '<select data-f="' + f.k + '"><option value="">' + esc(f.label) + '：全部</option>' +
+          opts.map(function (o) { return '<option value="' + esc(o.k) + '">' + esc(o.v) + '</option>'; }).join('') + '</select>';
+      }
+      return '<input data-f="' + f.k + '" placeholder="' + esc(f.label + '（' + (f.ph || '') + '）') + '">';
+    }).join('');
+
+    var head = m.list.map(function (k) { return '<th>' + esc(LABEL[k] || k) + '</th>'; }).join('');
+    if (!m.readonly) head += '<th style="width:120px">操作</th>';
+
+    var rows = state.records.map(function (r) {
+      var tds = m.list.map(function (k) {
+        var v = r[k];
+        if (k === 'gender') return '<td>' + esc(GENDER[v] || '-') + '</td>';
+        if (k === 'status') {
+          var txt = (m.readonly ? REG_STATUS : STATUS)[v];
+          var cls = 'gray';
+          if (!m.readonly) cls = v === 1 ? 'on' : 'off';
+          return '<td><span class="tag ' + cls + '">' + esc(txt || v) + '</span></td>';
+        }
+        if (k === 'departmentId') {
+          var dep = state.departments.filter(function (d) { return d.id === v; })[0];
+          return '<td>' + esc(dep ? dep.deptName : ('#' + v)) + '</td>';
+        }
+        if (k === 'regType') return '<td>' + esc(REG_TYPE[v] || v) + '</td>';
+        if (k === 'regTime') return '<td>' + esc(String(v || '').replace('T', ' ').slice(0, 16)) + '</td>';
+        if (k === 'chargeAmount') return '<td>￥' + esc(v) + '</td>';
+        return '<td>' + esc(v === '' || v === null || v === undefined ? '-' : v) + '</td>';
+      }).join('');
+      var ops = '';
+      if (!m.readonly) {
+        ops = '<td><div class="ops">' +
+          '<button class="btn sm ghost" data-edit="' + r.id + '">编辑</button>' +
+          '<button class="btn sm danger-text" data-del="' + r.id + '">删除</button>' +
+          '</div></td>';
+      }
+      return '<tr>' + tds + ops + '</tr>';
+    }).join('');
+
+    var emptyRow = '<tr><td colspan="' + (m.list.length + (m.readonly ? 0 : 1)) + '"><div class="empty">暂无数据</div></td></tr>';
+
+    elPanel.innerHTML =
+      '<div class="toolbar">' + filters +
+        '<button class="btn" id="btnSearch">查询</button>' +
+        '<button class="btn" id="btnReset">重置</button>' +
+        '<span class="grow"></span>' +
+        (m.readonly ? '' : '<button class="btn primary" id="btnAdd">+ 新增</button>') +
+      '</div>' +
+      '<div class="table-wrap"><table><thead><tr>' + head + '</tr></thead><tbody>' + (rows || emptyRow) + '</tbody></table></div>' +
+      '<div class="pager">' +
+        '<span>共 ' + state.total + ' 条，第 ' + (state.pages ? state.pageNum : 0) + ' / ' + state.pages + ' 页</span>' +
+        '<span>' +
+          '<button id="btnPrev"' + (state.pageNum <= 1 ? ' disabled' : '') + '>上一页</button> ' +
+          '<button id="btnNext"' + (state.pageNum >= state.pages ? ' disabled' : '') + '>下一页</button>' +
+        '</span>' +
+      '</div>';
+
+    bindPanel();
+  }
+
+  function bindPanel() {
+    var m = MODULES[state.key];
+    elPanel.querySelectorAll('input[data-f],select[data-f]').forEach(function (inp) {
+      inp.value = state.filters[inp.getAttribute('data-f')] || '';
+    });
+    var btnSearch = document.getElementById('btnSearch');
+    if (btnSearch) btnSearch.onclick = function () {
+      state.filters = {};
+      elPanel.querySelectorAll('input[data-f],select[data-f]').forEach(function (inp) {
+        var v = inp.value.trim();
+        if (v) state.filters[inp.getAttribute('data-f')] = v;
+      });
+      state.pageNum = 1;
+      load();
+    };
+    var btnReset = document.getElementById('btnReset');
+    if (btnReset) btnReset.onclick = function () { state.filters = {}; state.pageNum = 1; load(); };
+    var btnAdd = document.getElementById('btnAdd');
+    if (btnAdd) btnAdd.onclick = function () { openDialog(null); };
+    var btnPrev = document.getElementById('btnPrev');
+    if (btnPrev) btnPrev.onclick = function () { if (state.pageNum > 1) { state.pageNum--; load(); } };
+    var btnNext = document.getElementById('btnNext');
+    if (btnNext) btnNext.onclick = function () { if (state.pageNum < state.pages) { state.pageNum++; load(); } };
+    elPanel.querySelectorAll('[data-edit]').forEach(function (b) {
+      b.onclick = function () {
+        var id = Number(b.getAttribute('data-edit'));
+        var rec = state.records.filter(function (r) { return r.id === id; })[0];
+        openDialog(rec);
+      };
+    });
+    elPanel.querySelectorAll('[data-del]').forEach(function (b) {
+      b.onclick = function () {
+        var id = Number(b.getAttribute('data-del'));
+        var rec = state.records.filter(function (r) { return r.id === id; })[0];
+        var name = m.readonly ? '' : '';
+        if (!confirm('确认删除「' + (rec.name || rec.deptName || rec.regNo || ('#' + id)) + '」这条记录吗？删除后不可恢复。')) return;
+        request(m.api + '/' + id, { method: 'DELETE' }).then(function () {
+          toast('删除成功');
+          load();
+        }).catch(function (e) { toast(e.message, true); });
+      };
+    });
+  }
+
+  function openDialog(rec) {
+    var m = MODULES[state.key];
+    state.editing = rec;
+    elDialogTitle.textContent = rec ? '编辑' : '新增';
+    elForm.innerHTML = m.fields.map(function (f) { return fieldHtml(f, rec ? rec[f.k] : ''); }).join('');
+    elMask.classList.add('show');
+  }
+
+  function closeDialog() {
+    elMask.classList.remove('show');
+    state.editing = null;
+  }
+
+  function collectForm() {
+    var m = MODULES[state.key];
+    var body = {};
+    m.fields.forEach(function (f) {
+      var inp = elForm.querySelector('[name="' + f.k + '"]');
+      var v = inp ? inp.value.trim() : '';
+      if (!v) return;
+      if (f.type === 'select' && f.options === 'departments') body[f.k] = Number(v);
+      else if (f.k === 'gender' || f.k === 'status') body[f.k] = Number(v);
+      else body[f.k] = v;
+    });
+    return body;
+  }
+
+  document.getElementById('btnCancel').onclick = closeDialog;
+  elMask.onclick = function (e) { if (e.target === elMask) closeDialog(); };
+  document.getElementById('btnSubmit').onclick = function () {
+    var m = MODULES[state.key];
+    var body = collectForm();
+    var editing = state.editing;
+    var p;
+    if (editing) p = request(m.api + '/' + editing.id, { method: 'PUT', body: body });
+    else p = request(m.api, { method: 'POST', body: body });
+    p.then(function () {
+      toast(editing ? '修改成功' : '新增成功');
+      closeDialog();
+      load();
+    }).catch(function (e) { toast(e.message, true); });
+  };
+
+  function loadDepartments() {
+    return request('/api/v1/department/list').then(function (data) {
+      state.departments = data || [];
+    }).catch(function () { state.departments = []; });
+  }
+
+  function load() {
+    var m = MODULES[state.key];
+    var qs = ['pageNum=' + state.pageNum, 'pageSize=' + state.pageSize];
+    Object.keys(state.filters).forEach(function (k) {
+      qs.push(encodeURIComponent(k) + '=' + encodeURIComponent(state.filters[k]));
+    });
+    var url = (m.detailApi || (m.api + '/page')) + '?' + qs.join('&');
+    return request(url).then(function (data) {
+      state.records = (data && data.records) || [];
+      state.total = (data && data.total) || 0;
+      state.pages = (data && data.pages) || 0;
+      state.pageNum = (data && data.current) || 1;
+      renderPanel();
+    }).catch(function (e) {
+      state.records = [];
+      state.total = 0; state.pages = 0;
+      renderPanel();
+      toast('加载失败：' + e.message, true);
+    });
+  }
+
+  elTabs.onclick = function (e) {
+    var btn = e.target.closest('.tab');
+    if (!btn) return;
+    var key = btn.getAttribute('data-key');
+    if (key === state.key) return;
+    state.key = key;
+    state.pageNum = 1;
+    state.filters = {};
+    document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t === btn); });
+    load();
+  };
+
+  function checkHealth() {
+    fetch(API + '/api/v1/hello?name=admin').then(function (r) { return r.json(); }).then(function (j) {
+      document.getElementById('stateDot').className = 'dot';
+      var op = (j.data && j.data.operator) ? '当前用户 ' + j.data.operator : '已连接';
+      document.getElementById('stateText').textContent = '接口正常 · ' + op;
+    }).catch(function () {
+      document.getElementById('stateDot').className = 'dot off';
+      document.getElementById('stateText').textContent = '接口未连接';
+    });
+  }
+
+  renderTabs();
+  checkHealth();
+  loadDepartments().then(load);
+})();
+</script>
+</body>
+</html>
