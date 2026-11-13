@@ -8,7 +8,10 @@ import com.hospital.medical.entity.Patient;
 import com.hospital.medical.service.PatientService;
 import jakarta.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,6 +34,9 @@ public class PatientController {
 
     @Resource
     private PatientService patientService;
+
+    @Resource
+    private JdbcTemplate jdbcTemplate;
 
     /** 分页查询，支持姓名模糊、病历号模糊、手机号精确、性别过滤 */
     @GetMapping("/page")
@@ -55,6 +61,16 @@ public class PatientController {
     public Result<List<Patient>> list() {
         return Result.ok(patientService.list(
                 new LambdaQueryWrapper<Patient>().orderByAsc(Patient::getId)));
+    }
+
+    /** 数据库连通性自检：返回数据库版本、当前库名与患者表记录数 */
+    @GetMapping("/db-check")
+    public Result<Map<String, Object>> dbCheck() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("database", jdbcTemplate.queryForObject("SELECT VERSION()", String.class)
+                + " / " + jdbcTemplate.queryForObject("SELECT DATABASE()", String.class));
+        data.put("patientCount", jdbcTemplate.queryForObject("SELECT COUNT(*) FROM patient", Integer.class));
+        return Result.ok(data);
     }
 
     /** 按主键查询单条 */
