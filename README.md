@@ -2,6 +2,10 @@
 
 实验一产物：开发环境搭建 + Spring Boot 骨架 + 基础 Controller 接口。
 
+仓库地址：<https://github.com/tianming855-stack/medical-system>
+
+分支：`main`（可交付主干）/ `develop`（日常集成）。
+
 ## 本机环境
 
 | 组件 | 版本 | 安装路径 |
@@ -25,10 +29,14 @@
 medical-system
 ├─ pom.xml
 ├─ src/main/java/com/hospital/medical
-│  ├─ MedicalApplication.java      启动类
-│  └─ controller/HelloController.java   环境验证接口
-├─ src/main/resources/application.yml
-├─ sql/init.sql                    数据库初始化脚本
+│  ├─ MedicalApplication.java            启动类
+│  ├─ controller/HelloController.java    环境验证接口
+│  ├─ controller/PatientController.java  患者查询接口
+│  ├─ service/PatientService.java        业务层
+│  ├─ dao/PatientDao.java                数据访问层（JdbcTemplate）
+│  └─ entity/Patient.java                患者实体
+├─ src/main/resources/application.yml    含 MySQL 数据源配置
+├─ sql/init.sql                          数据库初始化脚本
 ├─ docs/实验1-环境搭建与验证记录.md
 └─ README.md
 ```
@@ -46,6 +54,8 @@ mvn spring-boot:run
 | --- | --- | --- |
 | GET | `/api/v1/hello?name=xxx` | 返回系统状态 JSON |
 | GET | `/api/v1/ping` | 返回 `pong` |
+| GET | `/api/v1/patient/db-check` | 返回数据库版本、库名与患者总数 |
+| GET | `/api/v1/patient/list?keyword=xxx` | 按姓名或病历号模糊查询患者，关键词可省略 |
 | GET | `/actuator/health` | 健康检查 |
 
 ## 数据库
@@ -62,6 +72,8 @@ mvn spring-boot:run
 ```
 
 注意：必须用文件重定向 `<` 导入。用 `Get-Content | mysql` 管道会把中文转成 `?`。
+
+应用连接配置在 `src/main/resources/application.yml`，使用业务账号 `medical`，连接串带 `useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true`。连接池为 HikariCP，最大 5 个连接。
 
 ## 分支规范
 
