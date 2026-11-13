@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.medical.mapper.PrescriptionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hospital.medical.entity.Prescription">
+        <id column="id" property="id" />
+        <result column="presc_no" property="prescNo" />
+        <result column="registration_id" property="registrationId" />
+        <result column="diagnosis" property="diagnosis" />
+        <result column="advice" property="advice" />
+        <result column="status" property="status" />
+        <result column="created_time" property="createdTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, presc_no, registration_id, diagnosis, advice, status, created_time
+    </sql>
+
+</mapper>
